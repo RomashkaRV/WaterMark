@@ -19,18 +19,20 @@ const sharp_1 = __importDefault(require("sharp"));
 const path_1 = __importDefault(require("path"));
 const archiver_1 = __importDefault(require("archiver"));
 const app = (0, express_1.default)();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3000; // Порт из переменных окружения
 // Настройки сервера
 app.use((0, cors_1.default)());
 app.use(express_1.default.static(path_1.default.join(__dirname, "public")));
 // Настройка загрузки файлов в память
 const upload = (0, multer_1.default)({ storage: multer_1.default.memoryStorage() });
 const watermarkPath = path_1.default.resolve("assets", "watermark.png");
+// Обработчик для загрузки и обработки изображений
 app.post("/process-images", upload.array("images", 10), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const files = req.files;
         const processedFiles = [];
         for (let file of files) {
+            // Обрабатываем изображение в памяти
             const metadata = yield (0, sharp_1.default)(file.buffer).metadata();
             const imageHeight = metadata.height || 0;
             const processedImage = yield (0, sharp_1.default)(file.buffer)
@@ -42,13 +44,15 @@ app.post("/process-images", upload.array("images", 10), (req, res) => __awaiter(
                     left: 10,
                 },
             ])
-                .toBuffer();
+                .toBuffer(); // Сохраняем результат в буфер
             processedFiles.push(processedImage);
         }
+        // Создаем архив с обработанными изображениями
         const archive = (0, archiver_1.default)("zip", { zlib: { level: 9 } });
         res.attachment("processed-images.zip");
         archive.pipe(res);
         for (let i = 0; i < processedFiles.length; i++) {
+            // Добавляем обработанное изображение в архив
             archive.append(processedFiles[i], { name: `processed-${i + 1}.png` });
         }
         archive.finalize();
@@ -58,5 +62,7 @@ app.post("/process-images", upload.array("images", 10), (req, res) => __awaiter(
         res.status(500).send("Ошибка обработки");
     }
 }));
-// Экспорт функции для Vercel
-exports.default = app;
+// Запуск сервера
+app.listen(port, () => {
+    console.log(`Сервер запущен на порту ${port}`);
+});
