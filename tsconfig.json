@@ -4,11 +4,14 @@
     "module": "commonjs",
     "strict": true,
     "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
     "outDir": "./dist",
     "rootDir": "./src"
   },
   "include": [
-    "WaterMark/src/**/*"
+    "src/**/*",
+    "api/**/*"
   ],
   "exclude": ["node_modules"]
 }
